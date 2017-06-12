@@ -101,6 +101,16 @@ extension BarManagingNavigationAnimatedTranistioning {
     }
 }
 
+private extension CGRect {
+    func offScreenRight() -> CGRect {
+        return applying(CGAffineTransform(translationX: width, y: 0))
+    }
+    
+    func underNavigationStack() -> CGRect {
+        return applying(CGAffineTransform(translationX: -width / 2, y: 0))
+    }
+}
+
 extension BarManagingNavigationAnimatedTranistioning: UIViewControllerAnimatedTransitioning {
     func transitionDuration(using transitionContext: UIViewControllerContextTransitioning?) -> TimeInterval {
         return 1
@@ -113,17 +123,85 @@ extension BarManagingNavigationAnimatedTranistioning: UIViewControllerAnimatedTr
             let from = transitionContext.viewController(forKey: .from)
             else { transitionContext.completeTransition(!transitionContext.transitionWasCancelled); return }
         
-        dump(navigationController.view.frame, name: "Navigation Frame")
-        dump(transitionContext.containerView.frame, name: "Container Frame")
-        dump(transitionContext.initialFrame(for: from), name: "From Initial Frame")
-        dump(transitionContext.finalFrame(for: to), name: "To Final Frame")
+        var transitions: [Transition] = []
         
-        to.view.frame = finalFrame(for: to, in: transitionContext)
-        to.view.layoutIfNeeded()
+        let fromInitialFrame = initialFrame(for: from, in: transitionContext)
+        let toFinalFrame = finalFrame(for: to, in: transitionContext)
+        
+        let maskView = UIView(frame: fromInitialFrame.union(toFinalFrame))
+        maskView.backgroundColor = #colorLiteral(red: 0, green: 0, blue: 0, alpha: 0.3037243151)
+        
+        let topView: UIView
+        
+        switch operation {
+        case .push:
+            transitions.append(FrameTransition(view: from.view, initial: fromInitialFrame, final: fromInitialFrame.underNavigationStack()))
+            transitions.append(FrameTransition(view: to.view, initial: toFinalFrame.offScreenRight(), final: toFinalFrame))
+            transitions.append(AlphaTransition(view: maskView, initial: 0, final: 1))
+            topView = to.view
+        case .pop:
+            transitions.append(FrameTransition(view: from.view, initial: fromInitialFrame, final: fromInitialFrame.offScreenRight()))
+            transitions.append(FrameTransition(view: to.view, initial: toFinalFrame.underNavigationStack(), final: toFinalFrame))
+            transitions.append(AlphaTransition(view: maskView, initial: 1, final: 0))
+            topView = from.view
+        case .none:
+            transitions.append(FrameTransition(view: from.view, initial: fromInitialFrame, final: fromInitialFrame))
+            transitions.append(FrameTransition(view: to.view, initial: toFinalFrame, final: toFinalFrame))
+            transitions.append(AlphaTransition(view: maskView, initial: 0, final: 0))
+            topView = to.view
+        }
+        
         transitionContext.containerView.addSubview(to.view)
-        transitionContext.completeTransition(true)
+        transitionContext.containerView.addSubview(maskView)
+        transitionContext.containerView.bringSubview(toFront: topView)
+        
+        for transition in transitions {
+            transition.start()
+        }
+        
+        
+        UIView.animate(withDuration: transitionDuration(using: transitionContext), animations: {
+            for transition in transitions {
+                transition.end()
+            }
+            
+        }, completion: { finished in
+            
+            maskView.removeFromSuperview()
+            
+            if transitionContext.transitionWasCancelled {
+                to.view.removeFromSuperview()
+                transitionContext.completeTransition(false)
+            } else {
+                from.view.removeFromSuperview()
+                transitionContext.completeTransition(true)
+            }
+        })
     }
     
     func animationEnded(_ transitionCompleted: Bool) {
     }
+}
+
+private protocol Transition {
+    func start()
+    func end()
+}
+
+private struct FrameTransition: Transition {
+    let view: UIView
+    let initial: CGRect
+    let final: CGRect
+    
+    func start() { view.frame = initial }
+    func end() { view.frame = final }
+}
+
+private struct AlphaTransition: Transition {
+    let view: UIView
+    let initial: CGFloat
+    let final: CGFloat
+    
+    func start() { view.alpha = initial }
+    func end() { view.alpha = final }
 }
