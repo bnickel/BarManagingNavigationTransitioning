@@ -20,6 +20,19 @@ class ViewController: UIViewController {
         // Dispose of any resources that can be recreated.
     }
 
-
+    @IBAction func pop(_ sender: Any) {
+        guard let navigationController = navigationController else { return }
+        if navigationController.viewControllers.count > 1 {
+            navigationController.popViewController(animated: true)
+        } else {
+            print("Already at root.")
+        }
+    }
+    
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        if segue.identifier == "showHidden" {
+            segue.destination.hidesNavigationBar = true
+        }
+    }
 }
 
