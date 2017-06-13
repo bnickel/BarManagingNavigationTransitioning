@@ -14,9 +14,24 @@ class BarManagingNavigationController: UINavigationController {
     fileprivate var navigationPopGestureRecognizer: UIScreenEdgePanGestureRecognizer?
     private var navigationPopGestureRecognizerDelegate: GestureRecognizerDelegate?
     
+    override init(rootViewController: UIViewController?) {
+        super.init(nibName: nil, bundle: nil)
+        configure()
+        if let rootViewController = rootViewController {
+            viewControllers = [rootViewController]
+        }
+    }
+    
+    required init?(coder aDecoder: NSCoder) {
+        super.init(coder: aDecoder)
+    }
     
     override func awakeFromNib() {
         super.awakeFromNib()
+        configure()
+    }
+    
+    private func configure() {
         navigationBar.isTranslucent = false
         delegate = self
         

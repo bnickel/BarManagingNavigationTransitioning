@@ -13,6 +13,7 @@
 		EB303A8A1EEF27E000BA601A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = EB303A891EEF27E000BA601A /* Assets.xcassets */; };
 		EB303A8D1EEF27E000BA601A /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = EB303A8B1EEF27E000BA601A /* LaunchScreen.storyboard */; };
 		EB303A961EEF29DC00BA601A /* BarManagingNavigationController.swift in Sources */ = {isa = PBXBuildFile; fileRef = EB303A951EEF29DC00BA601A /* BarManagingNavigationController.swift */; };
+		EB303A981EF0905B00BA601A /* BarManagingSplitViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = EB303A971EF0905B00BA601A /* BarManagingSplitViewController.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -24,6 +25,7 @@
 		EB303A8C1EEF27E000BA601A /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		EB303A8E1EEF27E000BA601A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		EB303A951EEF29DC00BA601A /* BarManagingNavigationController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BarManagingNavigationController.swift; sourceTree = "<group>"; };
+		EB303A971EF0905B00BA601A /* BarManagingSplitViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BarManagingSplitViewController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -58,6 +60,7 @@
 			children = (
 				EB303A941EEF299F00BA601A /* Demo */,
 				EB303A951EEF29DC00BA601A /* BarManagingNavigationController.swift */,
+				EB303A971EF0905B00BA601A /* BarManagingSplitViewController.swift */,
 			);
 			path = BarManagingNavigationTransitioning;
 			sourceTree = "<group>";
@@ -149,6 +152,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				EB303A851EEF27E000BA601A /* ViewController.swift in Sources */,
+				EB303A981EF0905B00BA601A /* BarManagingSplitViewController.swift in Sources */,
 				EB303A961EEF29DC00BA601A /* BarManagingNavigationController.swift in Sources */,
 				EB303A831EEF27E000BA601A /* AppDelegate.swift in Sources */,
 			);

@@ -25,7 +25,11 @@ class ViewController: UIViewController {
     override func viewDidAppear(_ animated: Bool) {
         if self == navigationController?.viewControllers.first {
             popButton.isHidden = true
-            title = "Home"
+            if title == nil {
+                title = "Home"
+            }
+        } else {
+            popButton.isHidden = false
         }
     }
     
@@ -43,7 +47,7 @@ class ViewController: UIViewController {
     }
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        if segue.identifier == "showHidden" {
+        if ["showHidden", "showHiddenDetail"].contains(segue.identifier ?? "nope") {
             segue.destination.hidesNavigationBar = true
         }
         segue.destination.title = segue.identifier

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="11762" systemVersion="16F73" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="73O-LJ-dLu">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="11762" systemVersion="16F73" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="kmc-V3-rHw">
     <device id="retina4_7" orientation="portrait">
         <adaptation id="fullscreen"/>
     </device>
@@ -22,34 +22,48 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="10" translatesAutoresizingMaskIntoConstraints="NO" id="hMb-Jm-HlX">
-                                <rect key="frame" x="125.5" y="258.5" width="124" height="150"/>
+                                <rect key="frame" x="115" y="218.5" width="145" height="230"/>
                                 <subviews>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="PPK-bf-FdU">
-                                        <rect key="frame" x="0.0" y="0.0" width="124" height="30"/>
+                                        <rect key="frame" x="0.0" y="0.0" width="145" height="30"/>
                                         <state key="normal" title="Pop!"/>
                                         <connections>
                                             <action selector="pop:" destination="BYZ-38-t0r" eventType="touchUpInside" id="ns1-ft-s9I"/>
                                         </connections>
                                     </button>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="rqI-DZ-vmN">
-                                        <rect key="frame" x="0.0" y="40" width="124" height="30"/>
+                                        <rect key="frame" x="0.0" y="40" width="145" height="30"/>
                                         <state key="normal" title="Toggle Navigation"/>
                                         <connections>
                                             <action selector="toggleNavigation:" destination="BYZ-38-t0r" eventType="touchUpInside" id="vwK-KO-HTI"/>
                                         </connections>
                                     </button>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="k8j-5G-teJ">
-                                        <rect key="frame" x="0.0" y="80" width="124" height="30"/>
+                                        <rect key="frame" x="0.0" y="80" width="145" height="30"/>
                                         <state key="normal" title="Show Visible"/>
                                         <connections>
                                             <segue destination="BYZ-38-t0r" kind="show" identifier="showVisible" id="V3f-22-rmx"/>
                                         </connections>
                                     </button>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="WYt-Sd-OPr">
-                                        <rect key="frame" x="0.0" y="120" width="124" height="30"/>
+                                        <rect key="frame" x="0.0" y="120" width="145" height="30"/>
                                         <state key="normal" title="Show Hidden"/>
                                         <connections>
                                             <segue destination="BYZ-38-t0r" kind="show" identifier="showHidden" id="DY9-FW-vxi"/>
+                                        </connections>
+                                    </button>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="t7c-e2-H7t">
+                                        <rect key="frame" x="0.0" y="160" width="145" height="30"/>
+                                        <state key="normal" title="Show Visible (Detail)"/>
+                                        <connections>
+                                            <segue destination="BYZ-38-t0r" kind="showDetail" identifier="showVisibleDetail" id="oYX-Ka-uc1"/>
+                                        </connections>
+                                    </button>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="3H0-0e-O1p">
+                                        <rect key="frame" x="0.0" y="200" width="145" height="30"/>
+                                        <state key="normal" title="Show Hidden (Detail)"/>
+                                        <connections>
+                                            <segue destination="BYZ-38-t0r" kind="showDetail" identifier="showHiddenDetail" id="oNk-8p-fPC"/>
                                         </connections>
                                     </button>
                                 </subviews>
@@ -70,6 +84,18 @@
             </objects>
             <point key="canvasLocation" x="753" y="229"/>
         </scene>
+        <!--Bar Managing Split View Controller-->
+        <scene sceneID="ceG-w2-BJG">
+            <objects>
+                <splitViewController id="kmc-V3-rHw" customClass="BarManagingSplitViewController" customModule="BarManagingNavigationTransitioning" customModuleProvider="target" sceneMemberID="viewController">
+                    <connections>
+                        <segue destination="73O-LJ-dLu" kind="relationship" relationship="masterViewController" id="V7l-zw-8zS"/>
+                    </connections>
+                </splitViewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="xdx-t0-QdX" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="-910" y="229"/>
+        </scene>
         <!--Bar Managing Navigation Controller-->
         <scene sceneID="2HF-jW-FyY">
             <objects>
@@ -84,7 +110,7 @@
                 </navigationController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="mce-Fd-tDc" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-134" y="229"/>
+            <point key="canvasLocation" x="-63" y="229"/>
         </scene>
     </scenes>
     <inferredMetricsTieBreakers>
