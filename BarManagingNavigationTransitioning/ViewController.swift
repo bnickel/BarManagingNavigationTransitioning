@@ -33,6 +33,7 @@ class ViewController: UIViewController {
         if segue.identifier == "showHidden" {
             segue.destination.hidesNavigationBar = true
         }
+        segue.destination.title = segue.identifier
     }
 }
 
