@@ -19,6 +19,19 @@ class ViewController: UIViewController {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
     }
+    
+    @IBOutlet var popButton: UIButton!
+    
+    override func viewDidAppear(_ animated: Bool) {
+        if self == navigationController?.viewControllers.first {
+            popButton.isHidden = true
+            title = "Home"
+        }
+    }
+    
+    @IBAction func toggleNavigation(_ sender: Any) {
+        setHidesNavigationBar(!hidesNavigationBar, animated: true)
+    }
 
     @IBAction func pop(_ sender: Any) {
         guard let navigationController = navigationController else { return }

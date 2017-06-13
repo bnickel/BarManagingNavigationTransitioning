@@ -22,24 +22,31 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="10" translatesAutoresizingMaskIntoConstraints="NO" id="hMb-Jm-HlX">
-                                <rect key="frame" x="142" y="278.5" width="91" height="110"/>
+                                <rect key="frame" x="125.5" y="258.5" width="124" height="150"/>
                                 <subviews>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="PPK-bf-FdU">
-                                        <rect key="frame" x="0.0" y="0.0" width="91" height="30"/>
+                                        <rect key="frame" x="0.0" y="0.0" width="124" height="30"/>
                                         <state key="normal" title="Pop!"/>
                                         <connections>
                                             <action selector="pop:" destination="BYZ-38-t0r" eventType="touchUpInside" id="ns1-ft-s9I"/>
                                         </connections>
                                     </button>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="rqI-DZ-vmN">
+                                        <rect key="frame" x="0.0" y="40" width="124" height="30"/>
+                                        <state key="normal" title="Toggle Navigation"/>
+                                        <connections>
+                                            <action selector="toggleNavigation:" destination="BYZ-38-t0r" eventType="touchUpInside" id="vwK-KO-HTI"/>
+                                        </connections>
+                                    </button>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="k8j-5G-teJ">
-                                        <rect key="frame" x="0.0" y="40" width="91" height="30"/>
+                                        <rect key="frame" x="0.0" y="80" width="124" height="30"/>
                                         <state key="normal" title="Show Visible"/>
                                         <connections>
                                             <segue destination="BYZ-38-t0r" kind="show" identifier="showVisible" id="V3f-22-rmx"/>
                                         </connections>
                                     </button>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="WYt-Sd-OPr">
-                                        <rect key="frame" x="0.0" y="80" width="91" height="30"/>
+                                        <rect key="frame" x="0.0" y="120" width="124" height="30"/>
                                         <state key="normal" title="Show Hidden"/>
                                         <connections>
                                             <segue destination="BYZ-38-t0r" kind="show" identifier="showHidden" id="DY9-FW-vxi"/>
@@ -55,6 +62,9 @@
                         </constraints>
                     </view>
                     <navigationItem key="navigationItem" id="vpV-KB-PTA"/>
+                    <connections>
+                        <outlet property="popButton" destination="PPK-bf-FdU" id="2Ki-Bb-Rse"/>
+                    </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
             </objects>
