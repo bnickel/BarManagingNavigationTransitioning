@@ -12,6 +12,8 @@ class BarManagingNavigationController: UINavigationController {
     
     fileprivate var activeInteractiveTransition: NavigationPercentDrivenInteractiveTransition?
     fileprivate var navigationPopGestureRecognizer: UIScreenEdgePanGestureRecognizer?
+    private var navigationPopGestureRecognizerDelegate: GestureRecognizerDelegate?
+    
     
     override func awakeFromNib() {
         super.awakeFromNib()
@@ -20,6 +22,10 @@ class BarManagingNavigationController: UINavigationController {
         
         let gestureRecognizer = UIScreenEdgePanGestureRecognizer(target: self, action: #selector(self.respondToNavigationPopGestureRecognizer(_:)))
         gestureRecognizer.edges = .left
+        
+        navigationPopGestureRecognizerDelegate = GestureRecognizerDelegate(navigationController: self)
+        gestureRecognizer.delegate = navigationPopGestureRecognizerDelegate
+        
         view.addGestureRecognizer(gestureRecognizer)
         navigationPopGestureRecognizer = gestureRecognizer
     }
@@ -89,6 +95,26 @@ extension BarManagingNavigationController: UINavigationControllerDelegate {
         default:
             break
             
+        }
+    }
+    
+    fileprivate class GestureRecognizerDelegate: NSObject, UIGestureRecognizerDelegate {
+        unowned var navigationController: UINavigationController
+        
+        init(navigationController: UINavigationController) {
+            self.navigationController = navigationController
+        }
+        
+        fileprivate func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldReceive touch: UITouch) -> Bool {
+            guard
+                navigationController.transitionCoordinator == nil,
+                navigationController.viewControllers.count > 1
+                else { return false }
+            return true
+        }
+        
+        fileprivate func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
+            return false
         }
     }
 }
