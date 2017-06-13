@@ -47,6 +47,8 @@ extension BarManagingSplitViewController: UISplitViewControllerDelegate {
             }
         }
         
+        vc.navigationItem.leftBarButtonItem = splitViewController.displayModeButtonItem
+        vc.navigationItem.leftItemsSupplementBackButton = true
         splitViewController.viewControllers = [splitViewController.viewControllers[0], BarManagingNavigationController(rootViewController: vc)]
         return true
     }
@@ -60,9 +62,10 @@ extension BarManagingSplitViewController: UISplitViewControllerDelegate {
     }
     
     func splitViewController(_ splitViewController: UISplitViewController, separateSecondaryFrom primaryViewController: UIViewController) -> UIViewController? {
-        
         if let primaryViewController = primaryViewController as? UINavigationController, let index = primaryViewController.viewControllers.index(where: { $0.isDetailViewController }) {
             let viewControllers = Array(primaryViewController.viewControllers[index..<primaryViewController.viewControllers.endIndex])
+            viewControllers.first?.navigationItem.leftBarButtonItem = splitViewController.displayModeButtonItem
+            viewControllers.first?.navigationItem.leftItemsSupplementBackButton = true
             primaryViewController.popToViewController(primaryViewController.viewControllers[index - 1], animated: false)
             let navigationController = BarManagingNavigationController(rootViewController: nil)
             navigationController.viewControllers = viewControllers
