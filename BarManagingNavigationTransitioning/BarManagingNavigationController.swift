@@ -10,10 +10,18 @@ import UIKit
 
 class BarManagingNavigationController: UINavigationController {
     
+    fileprivate var activeInteractiveTransition: NavigationPercentDrivenInteractiveTransition?
+    fileprivate var navigationPopGestureRecognizer: UIScreenEdgePanGestureRecognizer?
+    
     override func awakeFromNib() {
         super.awakeFromNib()
         navigationBar.isTranslucent = false
         delegate = self
+        
+        let gestureRecognizer = UIScreenEdgePanGestureRecognizer(target: self, action: #selector(self.respondToNavigationPopGestureRecognizer(_:)))
+        gestureRecognizer.edges = .left
+        view.addGestureRecognizer(gestureRecognizer)
+        navigationPopGestureRecognizer = gestureRecognizer
     }
     
     override var delegate: UINavigationControllerDelegate? {
@@ -33,12 +41,68 @@ extension BarManagingNavigationController: UINavigationControllerDelegate {
     }
     
     func navigationController(_ navigationController: UINavigationController, didShow viewController: UIViewController, animated: Bool) {
-        self.setNavigationBarHidden(viewController.hidesNavigationBar, animated: false)
+        setNavigationBarHidden(viewController.hidesNavigationBar, animated: false)
     }
     
     func navigationController(_ navigationController: UINavigationController, animationControllerFor operation: UINavigationControllerOperation, from fromVC: UIViewController, to toVC: UIViewController) -> UIViewControllerAnimatedTransitioning? {
         return BarManagingNavigationAnimatedTranistioning(navigationController: self, operation: operation)
     }
+    
+    func navigationController(_ navigationController: UINavigationController, interactionControllerFor animationController: UIViewControllerAnimatedTransitioning) -> UIViewControllerInteractiveTransitioning? {
+        if navigationPopGestureRecognizer?.state == .began {
+            let transition = NavigationPercentDrivenInteractiveTransition()
+            activeInteractiveTransition = transition
+            return transition
+        } else {
+            return nil
+        }
+    }
+    
+    @objc(SEUI_respondToNavigationPopGestureRecognizer:) fileprivate func respondToNavigationPopGestureRecognizer(_ sender: UIScreenEdgePanGestureRecognizer) {
+        switch sender.state {
+            
+        case .began:
+            _ = popViewController(animated: true)
+            
+        case .changed:
+            activeInteractiveTransition?.update(sender.translation(in: view).x / view.bounds.width)
+            
+        case .cancelled:
+            activeInteractiveTransition?.completionCurve = .linear
+            activeInteractiveTransition?.completionSpeed = 1
+            activeInteractiveTransition?.cancel()
+            activeInteractiveTransition = nil
+            
+        case .ended:
+            if let activeInteractiveTransition = activeInteractiveTransition {
+                activeInteractiveTransition.completionSpeed = 1
+                if sender.velocity(in: view).x > 0 && activeInteractiveTransition.hasInteractedRecently || activeInteractiveTransition.percentComplete > 0.6 {
+                    activeInteractiveTransition.completionCurve = .easeOut
+                    activeInteractiveTransition.finish()
+                } else {
+                    activeInteractiveTransition.completionCurve = .linear
+                    activeInteractiveTransition.cancel()
+                }
+            }
+            activeInteractiveTransition = nil
+            
+        default:
+            break
+            
+        }
+    }
+}
+
+class NavigationPercentDrivenInteractiveTransition: UIPercentDrivenInteractiveTransition {
+    private var lastUpdateTime = Date.timeIntervalSinceReferenceDate
+    var recentInteractionCutoff: TimeInterval = 0.25
+    
+    override func update(_ percentComplete: CGFloat) {
+        super.update(percentComplete)
+        lastUpdateTime = Date.timeIntervalSinceReferenceDate
+    }
+    
+    var hasInteractedRecently: Bool { return Date.timeIntervalSinceReferenceDate - lastUpdateTime < recentInteractionCutoff }
 }
 
 extension UIViewController {
@@ -135,6 +199,7 @@ extension BarManagingNavigationAnimatedTranistioning: UIViewControllerAnimatedTr
         let topView: UIView
         
         switch operation {
+            
         case .push:
             fromFinalFrameTransform = CGRect.underNavigationStack
             toInitialFrameTransform = CGRect.offScreenRight
@@ -146,6 +211,7 @@ extension BarManagingNavigationAnimatedTranistioning: UIViewControllerAnimatedTr
             toInitialFrameTransform = CGRect.underNavigationStack
             maskAlpha = (1, 0)
             topView = from.view
+            
         case .none:
             fromFinalFrameTransform = { $0 }
             toInitialFrameTransform = { $0 }
@@ -183,7 +249,9 @@ extension BarManagingNavigationAnimatedTranistioning: UIViewControllerAnimatedTr
             transition.start()
         }
         
-        UIView.animate(withDuration: transitionDuration(using: transitionContext), animations: {
+        let options: UIViewAnimationOptions = transitionContext.isInteractive ? .curveLinear : .curveEaseOut
+        
+        UIView.animate(withDuration: transitionDuration(using: transitionContext), delay: 0, options: options, animations: {
             for transition in transitions {
                 transition.end()
             }
@@ -198,9 +266,11 @@ extension BarManagingNavigationAnimatedTranistioning: UIViewControllerAnimatedTr
             
             if transitionContext.transitionWasCancelled {
                 to.view.removeFromSuperview()
+                self.navigationController.setNavigationBarHidden(from.hidesNavigationBar, animated: false)
                 transitionContext.completeTransition(false)
             } else {
                 from.view.removeFromSuperview()
+                self.navigationController.setNavigationBarHidden(to.hidesNavigationBar, animated: false)
                 transitionContext.completeTransition(true)
             }
         })
