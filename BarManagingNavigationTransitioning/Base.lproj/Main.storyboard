@@ -136,7 +136,7 @@
         <!--Item 1-->
         <scene sceneID="MsD-Ty-OV5">
             <objects>
-                <viewController id="DTV-Oy-14x" sceneMemberID="viewController">
+                <viewController id="DTV-Oy-14x" customClass="RedViewController" customModule="BarManagingNavigationTransitioning" customModuleProvider="target" sceneMemberID="viewController">
                     <layoutGuides>
                         <viewControllerLayoutGuide type="top" id="uzl-6O-Ud4"/>
                         <viewControllerLayoutGuide type="bottom" id="UHI-eo-kcL"/>

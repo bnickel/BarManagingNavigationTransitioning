@@ -20,12 +20,20 @@ class BarManagingSplitViewController: UISplitViewController {
         if !animated {
             showMasterViewController()
             if viewControllers.count == 1 {
-                viewControllers.append(placeholderViewController)
+                if let detailViewController = masterViewController?.detailViewController(for: self) {
+                    detailViewController.navigationItem.leftBarButtonItem = displayModeButtonItem
+                    detailViewController.navigationItem.leftItemsSupplementBackButton = true
+                    detailViewController.isDetailViewController = true
+                    viewControllers.append(BarManagingNavigationController(rootViewController: detailViewController))
+                } else {
+                    viewControllers.append(placeholderViewController)
+                }
             }
         }
     }
     
     fileprivate var loadedPlaceholderViewController: UIViewController?
+    fileprivate weak var recentlyAddedDetailViewController: UIViewController?
     
     var placeholderViewController: UIViewController {
         get {
@@ -54,7 +62,13 @@ extension UISplitViewController {
         return viewControllers.first
     }
     
+    @objc(SEUI_masterViewControllerIsHidden) var masterViewControllerIsHidden: Bool {
+        guard let masterViewController = masterViewController, masterViewController.isViewLoaded else { return true }
+        return masterViewController.view.window == nil || !masterViewController.view.frame.intersects(view.frame)
+    }
+    
     @objc(SEUI_showMasterViewController) func showMasterViewController() {
+        guard masterViewControllerIsHidden else { return }
         guard let target = displayModeButtonItem.target, let action = displayModeButtonItem.action else { return }
         UIApplication.shared.sendAction(action, to: target, from: displayModeButtonItem, for: nil)
     }
@@ -80,12 +94,18 @@ extension BarManagingSplitViewController: UISplitViewControllerDelegate {
         
         coordinator.animate(alongsideTransition: { context in
         }, completion: { context in
-            if self.isPlaceholderViewControllerLoaded && self.viewControllers.last == self.placeholderViewController {
-                DispatchQueue.main.async {
-                    self.showMasterViewController()
-                }
-            }
+            self.expandIfNeeded()
         })
+    }
+    
+    private func expandIfNeeded() {
+        if
+            viewControllers.last == loadedPlaceholderViewController ||
+            (recentlyAddedDetailViewController != nil && (viewControllers.last as? UINavigationController)?.topViewController == recentlyAddedDetailViewController) {
+            DispatchQueue.main.async {
+                self.showMasterViewController()
+            }
+        }
     }
     
     func splitViewController(_ splitViewController: UISplitViewController, showDetail vc: UIViewController, sender: Any?) -> Bool {
@@ -125,6 +145,12 @@ extension BarManagingSplitViewController: UISplitViewControllerDelegate {
             let navigationController = BarManagingNavigationController(rootViewController: nil)
             navigationController.viewControllers = viewControllers
             return navigationController
+        } else if let detailViewController = masterViewController?.detailViewController(for: self) {
+            detailViewController.navigationItem.leftBarButtonItem = splitViewController.displayModeButtonItem
+            detailViewController.navigationItem.leftItemsSupplementBackButton = true
+            detailViewController.isDetailViewController = true
+            recentlyAddedDetailViewController = detailViewController
+            return BarManagingNavigationController(rootViewController: detailViewController)
         } else {
             return placeholderViewController
         }
@@ -153,6 +179,10 @@ extension UIViewController {
     @objc(SEUI_removeDetailViewControllersForSplitViewController:) func removeDetailViewControllers(for splitViewController: UISplitViewController) -> [UIViewController] {
         return []
     }
+    
+    @objc(SEUI_detailViewControllerForSplitViewController:) func detailViewController(for splitViewController: UISplitViewController) -> UIViewController? {
+        return nil
+    }
 }
 
 extension UINavigationController {
@@ -168,6 +198,10 @@ extension UINavigationController {
         viewControllers.first?.navigationItem.leftItemsSupplementBackButton = true
         popToViewController(self.viewControllers[index - 1], animated: false)
         return viewControllers
+    }
+    
+    override func detailViewController(for splitViewController: UISplitViewController) -> UIViewController? {
+        return viewControllers.last?.detailViewController(for: splitViewController)
     }
 }
 
@@ -185,5 +219,9 @@ extension UITabBarController {
         }
         
         return selectedViewController?.removeDetailViewControllers(for: splitViewController) ?? []
+    }
+    
+    override func detailViewController(for splitViewController: UISplitViewController) -> UIViewController? {
+        return selectedViewController?.detailViewController(for: splitViewController)
     }
 }

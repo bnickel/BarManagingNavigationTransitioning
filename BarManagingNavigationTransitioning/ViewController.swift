@@ -54,3 +54,10 @@ class ViewController: UIViewController {
     }
 }
 
+class RedViewController: UIViewController {
+    override func detailViewController(for splitViewController: UISplitViewController) -> UIViewController? {
+        let viewController = UIViewController()
+        viewController.view.backgroundColor = .orange
+        return viewController
+    }
+}
