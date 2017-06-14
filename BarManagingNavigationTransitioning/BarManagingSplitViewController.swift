@@ -92,11 +92,11 @@ extension BarManagingSplitViewController: UISplitViewControllerDelegate {
         vc.isDetailViewController = true
         
         if splitViewController.isCollapsed {
-            splitViewController.viewControllers[0].show(vc, sender: sender)
+            masterViewController?.targetNavigationController(for: self)?.show(vc, sender: sender)
             return true
         }
         
-        if let sender = sender as? UIResponder, splitViewController.viewControllers.count >= 2, let detailViewController = splitViewController.viewControllers[1] as? BarManagingNavigationController {
+        if let sender = sender as? UIResponder, splitViewController.viewControllers.count >= 2, splitViewController.viewControllers.last != loadedPlaceholderViewController, let detailViewController = splitViewController.viewControllers[1] as? BarManagingNavigationController {
             if sequence(first: sender, next: { $0.next }).first(where: { $0 === detailViewController }) != nil {
                 detailViewController.show(vc, sender: sender)
                 return true
@@ -118,26 +118,72 @@ extension BarManagingSplitViewController: UISplitViewControllerDelegate {
     }
     
     func splitViewController(_ splitViewController: UISplitViewController, separateSecondaryFrom primaryViewController: UIViewController) -> UIViewController? {
-        if let primaryViewController = primaryViewController as? UINavigationController, let index = primaryViewController.viewControllers.index(where: { $0.isDetailViewController }) {
-            let viewControllers = Array(primaryViewController.viewControllers[index..<primaryViewController.viewControllers.endIndex])
-            viewControllers.first?.navigationItem.leftBarButtonItem = splitViewController.displayModeButtonItem
-            viewControllers.first?.navigationItem.leftItemsSupplementBackButton = true
-            primaryViewController.popToViewController(primaryViewController.viewControllers[index - 1], animated: false)
+        
+        let viewControllers = primaryViewController.removeDetailViewControllers(for: splitViewController)
+        
+        if viewControllers.count > 0 {
             let navigationController = BarManagingNavigationController(rootViewController: nil)
             navigationController.viewControllers = viewControllers
             return navigationController
+        } else {
+            return placeholderViewController
         }
-        
-        return placeholderViewController
     }
     
     func splitViewController(_ splitViewController: UISplitViewController, collapseSecondary secondaryViewController: UIViewController, onto primaryViewController: UIViewController) -> Bool {
-        if let primaryViewController = primaryViewController as? UINavigationController, secondaryViewController != loadedPlaceholderViewController, let secondaryViewController = secondaryViewController as? UINavigationController {
+        if secondaryViewController != loadedPlaceholderViewController, let primaryViewController = primaryViewController.targetNavigationController(for: splitViewController), let secondaryViewController = secondaryViewController as? UINavigationController {
             let viewControllers = secondaryViewController.viewControllers
+            if viewControllers.first?.navigationItem.leftBarButtonItem == splitViewController.displayModeButtonItem {
+                viewControllers.first?.navigationItem.leftBarButtonItem = nil
+            }
             secondaryViewController.viewControllers = []
             primaryViewController.viewControllers += viewControllers
         }
         
         return true
+    }
+}
+
+extension UIViewController {
+    
+    @objc(SEUI_targetNavigationControllerForSplitViewController:) func targetNavigationController(for splitViewController: UISplitViewController) -> UINavigationController? {
+        return nil
+    }
+    
+    @objc(SEUI_removeDetailViewControllersForSplitViewController:) func removeDetailViewControllers(for splitViewController: UISplitViewController) -> [UIViewController] {
+        return []
+    }
+}
+
+extension UINavigationController {
+    
+    override func targetNavigationController(for splitViewController: UISplitViewController) -> UINavigationController? {
+        return self
+    }
+    
+    override func removeDetailViewControllers(for splitViewController: UISplitViewController) -> [UIViewController] {
+        guard let index = self.viewControllers.index(where: { $0.isDetailViewController }) else { return [] }
+        let viewControllers = Array(self.viewControllers[index..<self.viewControllers.endIndex])
+        viewControllers.first?.navigationItem.leftBarButtonItem = splitViewController.displayModeButtonItem
+        viewControllers.first?.navigationItem.leftItemsSupplementBackButton = true
+        popToViewController(self.viewControllers[index - 1], animated: false)
+        return viewControllers
+    }
+}
+
+extension UITabBarController {
+    
+    override func targetNavigationController(for splitViewController: UISplitViewController) -> UINavigationController? {
+        return selectedViewController?.targetNavigationController(for: splitViewController)
+    }
+    
+    override func removeDetailViewControllers(for splitViewController: UISplitViewController) -> [UIViewController] {
+        guard let viewControllers = viewControllers else { return [] }
+        
+        for viewController in viewControllers where viewController != selectedViewController {
+            _ = viewController.removeDetailViewControllers(for: splitViewController)
+        }
+        
+        return selectedViewController?.removeDetailViewControllers(for: splitViewController) ?? []
     }
 }
