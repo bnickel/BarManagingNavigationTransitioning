@@ -14,6 +14,50 @@ class BarManagingSplitViewController: UISplitViewController {
         super.awakeFromNib()
         delegate = self
     }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        // This is just a sad attempt to capture first appearance.
+        if !animated {
+            showMasterViewController()
+            if viewControllers.count == 1 {
+                viewControllers.append(placeholderViewController)
+            }
+        }
+    }
+    
+    fileprivate var loadedPlaceholderViewController: UIViewController?
+    
+    var placeholderViewController: UIViewController {
+        get {
+            if let placeholderViewController = loadedPlaceholderViewController { return placeholderViewController }
+            let placeholderViewController = loadPlaceholderViewController()
+            loadedPlaceholderViewController = placeholderViewController
+            return placeholderViewController
+        }
+        set {
+            loadedPlaceholderViewController = newValue
+        }
+    }
+    
+    var isPlaceholderViewControllerLoaded: Bool { return loadedPlaceholderViewController != nil }
+    
+    open func loadPlaceholderViewController() -> UIViewController {
+        let viewController = UIViewController()
+        viewController.navigationItem.leftBarButtonItem = displayModeButtonItem
+        return BarManagingNavigationController(rootViewController: viewController)
+    }
+}
+
+extension UISplitViewController {
+    
+    @objc(SEUI_masterViewController) var masterViewController: UIViewController? {
+        return viewControllers.first
+    }
+    
+    @objc(SEUI_showMasterViewController) func showMasterViewController() {
+        guard let target = displayModeButtonItem.target, let action = displayModeButtonItem.action else { return }
+        UIApplication.shared.sendAction(action, to: target, from: displayModeButtonItem, for: nil)
+    }
 }
 
 extension UIViewController {
@@ -27,10 +71,22 @@ extension UIViewController {
             objc_setAssociatedObject(self, &UIViewController.isDetailViewControllerKey, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
         }
     }
-    
 }
 
 extension BarManagingSplitViewController: UISplitViewControllerDelegate {
+    
+    override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
+        super.viewWillTransition(to: size, with: coordinator)
+        
+        coordinator.animate(alongsideTransition: { context in
+        }, completion: { context in
+            if self.isPlaceholderViewControllerLoaded && self.viewControllers.last == self.placeholderViewController {
+                DispatchQueue.main.async {
+                    self.showMasterViewController()
+                }
+            }
+        })
+    }
     
     func splitViewController(_ splitViewController: UISplitViewController, showDetail vc: UIViewController, sender: Any?) -> Bool {
         vc.isDetailViewController = true
@@ -54,11 +110,11 @@ extension BarManagingSplitViewController: UISplitViewControllerDelegate {
     }
     
     func primaryViewController(forCollapsing splitViewController: UISplitViewController) -> UIViewController? {
-        return splitViewController.viewControllers.first
+        return masterViewController
     }
     
     func primaryViewController(forExpanding splitViewController: UISplitViewController) -> UIViewController? {
-        return splitViewController.viewControllers.first
+        return masterViewController
     }
     
     func splitViewController(_ splitViewController: UISplitViewController, separateSecondaryFrom primaryViewController: UIViewController) -> UIViewController? {
@@ -72,19 +128,16 @@ extension BarManagingSplitViewController: UISplitViewControllerDelegate {
             return navigationController
         }
         
-        return DummyViewController()
+        return placeholderViewController
     }
     
     func splitViewController(_ splitViewController: UISplitViewController, collapseSecondary secondaryViewController: UIViewController, onto primaryViewController: UIViewController) -> Bool {
-        if let primaryViewController = primaryViewController as? UINavigationController, let secondaryViewController = secondaryViewController as? UINavigationController {
-            let viewControllers = secondaryViewController.viewControllers.filter({ !($0 is DummyViewController) })
+        if let primaryViewController = primaryViewController as? UINavigationController, secondaryViewController != loadedPlaceholderViewController, let secondaryViewController = secondaryViewController as? UINavigationController {
+            let viewControllers = secondaryViewController.viewControllers
             secondaryViewController.viewControllers = []
             primaryViewController.viewControllers += viewControllers
         }
         
         return true
     }
-}
-
-private class DummyViewController: UIViewController {
 }
