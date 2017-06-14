@@ -16,6 +16,7 @@ class BarManagingSplitViewController: UISplitViewController {
     }
     
     override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
         // This is just a sad attempt to capture first appearance.
         if !animated {
             showMasterViewController()
@@ -102,7 +103,7 @@ extension BarManagingSplitViewController: UISplitViewControllerDelegate {
         if
             viewControllers.last == loadedPlaceholderViewController ||
             (recentlyAddedDetailViewController != nil && (viewControllers.last as? UINavigationController)?.topViewController == recentlyAddedDetailViewController) {
-            DispatchQueue.main.async {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
                 self.showMasterViewController()
             }
         }
